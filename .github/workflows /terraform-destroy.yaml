@@ -1,0 +1,49 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:   # 👈 Allows manual trigger from GitHub Actions UI
+    inputs:
+      workspace:
+        description: 'Terraform workspace/environment name (e.g. dev, prod)'
+        required: true
+        default: 'dev'
+
+jobs:
+  destroy:
+    name: Destroy Terraform Resources
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC auth to cloud providers
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      # Optional: configure cloud credentials if needed (AWS example)
+      - name: Configure AWS Credentials
+        if: env.AWS_ACCESS_KEY_ID == null
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<your-account-id>:role/<your-role-name>
+          aws-region: us-east-1
+
+      - name: Initialize Terraform
+        working-directory: ./terraform   # adjust path if needed
+        run: terraform init -input=false
+
+      - name: Select or create workspace
+        working-directory: ./terraform
+        run: |
+          terraform workspace select ${{ github.event.inputs.workspace }} || terraform workspace new ${{ github.event.inputs.workspace }}
+
+      - name: Terraform Destroy
+        working-directory: ./terraform
+        run: terraform destroy -auto-approve
