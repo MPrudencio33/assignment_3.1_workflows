@@ -10,6 +10,13 @@ terraform {
     }
 }
     
-resource "aws_s3_bucket" "marlon-bucket" {
-    bucket = "marlon-github-actions-bucket"
+#resource "aws_s3_bucket" "marlon-bucket" {
+#    bucket = "marlon-github-actions-bucket"
+#}
+
+
+resource "null_resource" "example" {
+    triggers = {
+        value = "A example resource that does nothing!"
+    }
 }
