@@ -10,6 +10,6 @@ terraform {
     } 
 }
 
-resource "aws_s3_bucket" "marlon_bucket" {
+resource "aws_s3_bucket" "marlon-bucket" {
     bucket = "marlon-github-actions-bucket"
 }
