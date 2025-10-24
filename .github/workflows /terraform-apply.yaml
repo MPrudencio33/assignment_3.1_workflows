@@ -5,7 +5,7 @@ on:
     branches: [ "main" ] 
  
 env:             
-  AWS_REGION: us-east-1  #ap-southeast-1   
+  AWS_REGION: ap-southeast-1   
  
 jobs: 
   CICD: 
@@ -23,7 +23,7 @@ jobs:
         aws-region: ${{ env.AWS_REGION }} 
  
     - name: Setup Terraform 
-      uses: hashicorp/setup-terraform@v2 
+      uses: hashicorp/setup-terraform@v3   #hashicorp/setup-terraform@v2 
     
     - name: Terraform Init 
       run: terraform init 

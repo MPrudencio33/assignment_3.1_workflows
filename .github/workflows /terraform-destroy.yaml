@@ -1,49 +1,34 @@
 name: Terraform Destroy
-
-on:
-  workflow_dispatch:   # 👈 Allows manual trigger from GitHub Actions UI
-    inputs:
-      workspace:
-        description: 'Terraform workspace/environment name (e.g. dev, prod)'
-        required: true
-        default: 'dev'
-
-jobs:
-  destroy:
-    name: Destroy Terraform Resources
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write  # Required for OIDC auth to cloud providers
-      pull-requests: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.0
-
-      # Optional: configure cloud credentials if needed (AWS example)
-      - name: Configure AWS Credentials
-        if: env.AWS_ACCESS_KEY_ID == null
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::<your-account-id>:role/<your-role-name>
-          aws-region: us-east-1
-
-      - name: Initialize Terraform
-        working-directory: ./terraform   # adjust path if needed
-        run: terraform init -input=false
-
-      - name: Select or create workspace
-        working-directory: ./terraform
-        run: |
-          terraform workspace select ${{ github.event.inputs.workspace }} || terraform workspace new ${{ github.event.inputs.workspace }}
-
-      - name: Terraform Destroy
-        working-directory: ./terraform
-        run: terraform destroy -auto-approve
+ 
+on: 
+  workflow_dispatch:
+ 
+env:             
+  AWS_REGION: ap-southeast-1   
+ 
+jobs: 
+  CICD: 
+    runs-on: ubuntu-latest 
+ 
+    steps: 
+    - name: Checkout 
+      uses: actions/checkout@v4    #actions/checkout@v3 
+    
+    - name: Configure AWS credentials 
+      uses: aws-actions/configure-aws-credentials@v4 
+      with: 
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+        aws-region: ${{ env.AWS_REGION }} 
+ 
+    - name: Setup Terraform 
+      uses: hashicorp/setup-terraform@v3   #hashicorp/setup-terraform@v2 
+    
+    - name: Terraform Init 
+      run: terraform init 
+ 
+    - name: Terraform Plan 
+      run: terraform plan 
+    
+    - name: Terraform Destroy 
+      run: terraform destroy --auto-approve
